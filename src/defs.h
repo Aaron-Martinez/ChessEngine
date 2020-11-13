@@ -31,11 +31,15 @@ typedef unsigned long long U64;
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
 enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
 enum { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
-
 enum { WHITE, BLACK, BOTH };
 
+// may use this depending on move representation details
+//enum { PROMOTED_KNIGHT = 1, PROMOTED_BISHOP = 2, PROMOTED_ROOK = 4, PROMOTED_QUEEN = 8};
+
+// castling rights
 enum { W_OO = 1, W_OOO = 2, B_OO = 4, B_OOO = 8 };
 
+// 120 index chess board
 enum {
     A1 = 21, B1, C1, D1, E1, F1, G1, H1,
     A2 = 31, B2, C2, D2, E2, F2, G2, H2, 
@@ -50,7 +54,29 @@ enum {
 extern int index120to64[BRD_NUM_SQ];
 extern int index64to120[64];
 
-struct moveHistory {
+extern int isPieceN[13];
+extern int isPieceK[13];
+extern int isPieceRQ[13];
+extern int isPieceBQ[13];
+
+extern int isPieceBig[13];
+extern int isPieceMaj[13];
+extern int isPieceMin[13];
+extern int pieceValue[13];
+extern int pieceColor[13];
+
+
+extern int filesArr[BRD_NUM_SQ];
+extern int ranksArr[BRD_NUM_SQ];
+
+// move flag bit masks
+extern const int moveFlagEP;
+extern const int moveFlagPawnDouble;
+extern const int moveFlagCastles;
+extern const int moveFlagIsCapture;
+extern const int moveFlagIsPromote;
+
+struct MoveHistory {
     int move;
     int castleRights;
     int enPas;

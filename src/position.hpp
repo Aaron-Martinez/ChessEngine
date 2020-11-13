@@ -4,7 +4,7 @@
 #include "defs.h"
 #include "engine.hpp"
 
-struct position {
+struct Position {
 
     int allPieces[BRD_NUM_SQ];
     U64 pawns[3];
@@ -22,7 +22,7 @@ struct position {
     int material[2];
     int castleRights;
 
-    moveHistory history[MAXMOVES];
+    MoveHistory history[MAXMOVES];
 
     // piece list
     int pList[13][10];
@@ -30,9 +30,11 @@ struct position {
 };
 
 void initHashKeys();
-void resetBoard(position *pos);
-U64 generatePosKey(const position *pos);
-int parseFEN(const char *fen, position *pos);
-void printBoard(const position *pos);
+void resetBoard(Position *pos);
+U64 generatePosKey(const Position *pos);
+int parseFEN(const char *fen, Position *pos);
+void printBoard(const Position *pos);
+void updateMaterialLists(Position *pos);
+int checkBoard(const Position *pos);
 
 #endif
