@@ -1,5 +1,4 @@
 #include "utils.hpp"
-#include "move_gen.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -19,7 +18,7 @@ namespace utils {
         for(int rank = 0; rank < 8; ++rank) {
             for(int file = 0; file < 8; ++file) {
                 int index120 = index64to120[i];
-                sq120Strings[i] = fileStrs[file] + rankStrs[rank];
+                sq120Strings[index120] = fileStrs[file] + rankStrs[rank];
                 i++;
             }
         }
@@ -30,7 +29,6 @@ namespace utils {
     }
 
     void printSq120(int sq120) {
-        //printf("%s\n", sq120Str(sq120));
         std::cout << sq120Str(sq120) << std::endl;
     }
 
@@ -46,6 +44,11 @@ namespace utils {
 
     // temp method ugly printmove
     void printMove(int move) {
+        string moveStr = makeMoveStr(move);
+        std::cout << moveStr << std::endl;
+    }
+
+    string makeMoveStr(int move) {
 
         string moveStr;
 
@@ -74,8 +77,40 @@ namespace utils {
             moveStr += "=" + p;
         }
 
-        std::cout << moveStr << std::endl;
+        return moveStr;
     }
 
+
+    void printMoveList(const MoveList *list) {
+
+        std::cout << "\nMoveList:\n";
+        for(int i = 0; i < list->count; ++i) {
+            int move = list->moves[i].move;
+            int score = list->moves[i].score;
+            printf("Move #%d: %s (score:%d)\n", i+1, makeMoveStr(move).c_str(), score);
+        }
+    }
+
+
+    // Validation methods
+    bool sqOnBoard(const int sq) {
+        return filesArr[sq] == OFFBOARD ? false : true;
+    }
+
+    bool validateSide(const int side) {
+        return (side == WHITE || side == BLACK) ? true : false;
+    }
+    
+    bool validateRankFile(const int rankOrFile) {
+        return (rankOrFile >= 0 && rankOrFile <= 7) ? true : false;
+    }
+    
+    bool validatePiece(const int piece) {
+        return (piece >= EMPTY && piece <= bK) ? true : false;
+    }
+    
+    bool validatePieceNonempty(const int piece) {
+        return (piece >= wP && piece <= bK) ? true : false;
+    }
 
 };

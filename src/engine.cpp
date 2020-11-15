@@ -3,6 +3,7 @@
 #include "position.hpp"
 #include "engine.hpp"
 #include "utils.hpp"
+#include "move_gen.hpp"
 
 
 // the following arrays are used to convert indices between 8x8 and 12x10 board
@@ -59,9 +60,13 @@ void initBoardIndexConversions() {
 void run() {
     
     Position pos[1];
-    std::string a = START_FEN;
+    std::string a = PAWN_MOVE_TEST_FEN_W;
     parseFEN(a.c_str(), pos);
     printBoard(pos);
+
+    MoveList list[1];
+    generateAllMoves(pos, list);
+    utils::printMoveList(list);
 
 }
 

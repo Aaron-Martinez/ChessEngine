@@ -20,7 +20,11 @@ exit(1);}
 
 #define BRD_NUM_SQ 120
 #define MAXMOVES 2048
+#define MAXPOSITIONMOVES 256
+
 #define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+#define PAWN_MOVE_TEST_FEN_W "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P3P3/RNBQKBNR w KQkq e6 0 1"  // 43 legal moves
+#define PAWN_MOVE_TEST_FEN_B "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P3P3/RNBQKBNR b KQkq e3 0 1"
 
 
 #include <iostream>
@@ -64,7 +68,7 @@ extern int isPieceMaj[13];
 extern int isPieceMin[13];
 extern int pieceValue[13];
 extern int pieceColor[13];
-
+extern bool isSlidingPiece[13];
 
 extern int filesArr[BRD_NUM_SQ];
 extern int ranksArr[BRD_NUM_SQ];

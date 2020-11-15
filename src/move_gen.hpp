@@ -57,13 +57,31 @@ struct Move2 {
 };
 
 
+struct MoveList {
+    Move moves[MAXPOSITIONMOVES];
+    int count;
+};
+
+
 bool isSqAttacked(const int sq, const int side, const Position *pos);
 
-// these methods retrieve specific information from a move
+// these methods extract specific information from a move
 int originSQ(int move);
 int targetSQ(int move);
 int captured(int move);
 int promoted(int move);
+
+void generateAllMoves(const Position *pos, MoveList *list);
+int createMove(int originSQ, int targetSQ, int capturedPiece, int promotedPiece, int flags);
+
+static void addQuietMove(const Position *pos, int move, MoveList *list);
+static void addCaptureMove(const Position *pos, int move, MoveList *list);
+static void addEnPasMove(const Position *pos, int move, MoveList *list);
+
+static void addWhitePawnCapMove(const Position *pos, const int originSQ, const int targetSQ, const int cap, MoveList *list);
+static void addWhitePawnMove(const Position *pos, const int originSQ, const int targetSQ, MoveList *list);
+static void addBlackPawnCapMove(const Position *pos, const int originSQ, const int targetSQ, const int cap, MoveList *list);
+static void addBlackPawnMove(const Position *pos, const int originSQ, const int targetSQ, MoveList *list);
 
 
 #endif

@@ -158,7 +158,7 @@ int checkBoard(const Position *pos) {
     ASSERT(pos->allPieces[pos->kingSq[WHITE]] == wK);
     ASSERT(pos->allPieces[pos->kingSq[BLACK]] == bK);
 
-    return 0;
+    return 1;
 }
 
 
@@ -216,6 +216,7 @@ void resetBoard(Position *pos) {
         pos->bigPieces[i] = 0;
         pos->majPieces[i] = 0;
         pos->minPieces[i] = 0;
+        pos->material[i] = 0;
         pos->pawns[i] = 0ULL;
     }
     pos->pawns[2] = 0ULL;
