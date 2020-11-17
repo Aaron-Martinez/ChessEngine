@@ -15,10 +15,10 @@ int ranksArr[BRD_NUM_SQ];
 
 int isPieceN[13] = {0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
 int isPieceK[13] = {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1};
-int isPieceRQ[13] = {0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0};
+int isPieceRQ[13] = {0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0};
 int isPieceBQ[13] = {0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0};
 
-int isPieceBig[13] = {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+int isPieceBig[13] = {0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1};
 int isPieceMaj[13] = {0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1};
 int isPieceMin[13] = {0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0};
 int pieceValue[13] = {0, 100, 325, 325, 550, 1000, 50000, 100, 325, 325, 550, 1000, 50000};
@@ -59,14 +59,20 @@ void initBoardIndexConversions() {
 
 void run() {
     
+    //utils::readFenFromFile("perftsuite.epd");
+
     Position pos[1];
-    std::string a = PAWN_MOVE_TEST_FEN_W;
+    //std::string a = "k7/B7/1B6/1B6/8/8/8/K6b w - - 0 1"; // 21
+    std::string a = TRICKY_FEN;
     parseFEN(a.c_str(), pos);
     printBoard(pos);
+    
+    //MoveList list[1];
+    //generateAllMoves(pos, list);
+    //utils::printMoveList(list);
 
-    MoveList list[1];
-    generateAllMoves(pos, list);
-    utils::printMoveList(list);
+    utils::perftTest(6, pos);
+    
 
 }
 

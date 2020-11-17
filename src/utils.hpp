@@ -4,8 +4,11 @@
 #include "defs.h"
 #include "position.hpp"
 #include "move_gen.hpp"
+#include "bitboard.hpp"
 
 #include <string>
+#include <iostream>
+#include <fstream>
 
 using std::string;
 
@@ -27,6 +30,10 @@ namespace utils {
     bool validateRankFile(const int rankOrFile);
     bool validatePiece(const int piece);
     bool validatePieceNonempty(const int piece);
+    void perft(int depth, Position *pos);
+    void perftTest(int depth, Position *pos);
+    void multiplePerftTest(int depth, Position *pos, string fen, string fullLine);
+    void readFenFromFile(string fileName);
 };
 
 #endif

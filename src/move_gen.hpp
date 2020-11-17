@@ -66,10 +66,10 @@ struct MoveList {
 bool isSqAttacked(const int sq, const int side, const Position *pos);
 
 // these methods extract specific information from a move
-int originSQ(int move);
-int targetSQ(int move);
-int captured(int move);
-int promoted(int move);
+int getOriginSQ(int move);
+int getTargetSQ(int move);
+int getCaptured(int move);
+int getPromoted(int move);
 
 void generateAllMoves(const Position *pos, MoveList *list);
 int createMove(int originSQ, int targetSQ, int capturedPiece, int promotedPiece, int flags);

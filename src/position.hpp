@@ -29,6 +29,12 @@ struct Position {
 
 };
 
+static void removePiece(const int sq, Position *pos);
+static void addPiece(const int sq, Position *pos, const int piece);
+static void movePiece(const int originSQ, const int targetSQ, Position *pos);
+bool makeMove(int move, Position *pos);
+void undoMove(Position *pos);
+
 void initHashKeys();
 void resetBoard(Position *pos);
 U64 generatePosKey(const Position *pos);

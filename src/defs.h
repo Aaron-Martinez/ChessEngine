@@ -25,6 +25,8 @@ exit(1);}
 #define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define PAWN_MOVE_TEST_FEN_W "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P3P3/RNBQKBNR w KQkq e6 0 1"  // 43 legal moves
 #define PAWN_MOVE_TEST_FEN_B "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P3P3/RNBQKBNR b KQkq e3 0 1"
+#define D4_FEN "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"
+#define TRICKY_FEN "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
 
 
 #include <iostream>

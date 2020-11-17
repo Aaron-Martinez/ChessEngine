@@ -99,10 +99,10 @@ void generateAllMoves(const Position *pos, MoveList *list) {
             }
             if(pos->enPas != NO_SQ && pos->enPas != OFFBOARD) {
                 if(sq + wpCapRight == pos->enPas) {
-                    addCaptureMove(pos, createMove(sq, sq + wpCapRight, bP, EMPTY, moveFlagEP), list);
+                    addEnPasMove(pos, createMove(sq, sq + wpCapRight, EMPTY, EMPTY, moveFlagEP), list);
                 }
                 if(sq + wpCapLeft == pos->enPas) {
-                    addCaptureMove(pos, createMove(sq, sq + wpCapLeft, bP, EMPTY, moveFlagEP), list);
+                    addEnPasMove(pos, createMove(sq, sq + wpCapLeft, EMPTY, EMPTY, moveFlagEP), list);
                 }
             }
 
@@ -130,10 +130,10 @@ void generateAllMoves(const Position *pos, MoveList *list) {
             }
             if(pos->enPas != NO_SQ && pos->enPas != OFFBOARD) {
                 if(sq + bpCapRight == pos->enPas) {
-                    addCaptureMove(pos, createMove(sq, sq + bpCapRight, wP, EMPTY, moveFlagEP), list);
+                    addEnPasMove(pos, createMove(sq, sq + bpCapRight, EMPTY, EMPTY, moveFlagEP), list);
                 }
                 if(sq + bpCapLeft == pos->enPas) {
-                    addCaptureMove(pos, createMove(sq, sq + bpCapLeft, wP, EMPTY, moveFlagEP), list);
+                    addEnPasMove(pos, createMove(sq, sq + bpCapLeft, EMPTY, EMPTY, moveFlagEP), list);
                 }
             }
 
@@ -255,13 +255,13 @@ static void addWhitePawnCapMove(const Position *pos, const int originSQ, const i
 static void addWhitePawnMove(const Position *pos, const int originSQ, const int targetSQ, MoveList *list) {
     if(ranksArr[originSQ] == RANK_7) {
         // this pawn is promoting, add move for each promotion piece choice
-        addCaptureMove(pos, createMove(originSQ, targetSQ, EMPTY, wQ, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, EMPTY, wR, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, EMPTY, wB, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, EMPTY, wN, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wQ, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wR, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wB, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wN, 0), list);
     }
     else {
-        addCaptureMove(pos, createMove(originSQ, targetSQ, EMPTY, EMPTY, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, EMPTY, 0), list);
     }
 }
 
@@ -283,29 +283,29 @@ static void addBlackPawnCapMove(const Position *pos, const int originSQ, const i
 static void addBlackPawnMove(const Position *pos, const int originSQ, const int targetSQ, MoveList *list) {
     if(ranksArr[originSQ] == RANK_2) {
         // this pawn is promoting, add move for each promotion piece choice
-        addCaptureMove(pos, createMove(originSQ, targetSQ, EMPTY, bQ, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, EMPTY, bR, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, EMPTY, bB, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, EMPTY, bN, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bQ, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bR, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bB, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bN, 0), list);
     }
     else {
-        addCaptureMove(pos, createMove(originSQ, targetSQ, EMPTY, EMPTY, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, EMPTY, 0), list);
     }
 }
 
-int originSQ(int move) {
+int getOriginSQ(int move) {
     return (move & 0x7f);
 }
 
-int targetSQ(int move) {
+int getTargetSQ(int move) {
     return ((move >> 7) & 0x7f);
 }
 
-int captured(int move) {
+int getCaptured(int move) {
     return ((move >> 14) & 0xf);
 }
 
-int promoted(int move) {
+int getPromoted(int move) {
     return ((move >> 20) & 0xf);
 }
 
@@ -316,7 +316,7 @@ bool isSqAttacked(const int sq, const int side, const Position *pos) {
 
     ASSERT(utils::sqOnBoard(sq));
     ASSERT(utils::validateSide(side));
-    ASSERT(checkBoard(pos));
+    //ASSERT(checkBoard(pos));
 
     // pawn attacks
     if(side == WHITE) {
@@ -383,5 +383,4 @@ bool isSqAttacked(const int sq, const int side, const Position *pos) {
     }
 
     return false;
-
 }

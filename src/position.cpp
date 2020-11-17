@@ -1,5 +1,7 @@
 #include "position.hpp"
 #include "bitboard.hpp"
+#include "utils.hpp"
+#include "move_gen.hpp"
 
 #define RAND_64 (   (U64)rand() | \
                     (U64)rand() << 15 | \
@@ -9,13 +11,315 @@
 
 U64 pieceKeys[13][120];
 U64 sideKey;
-U64 casteKeys[16];
+U64 castleKeys[16];
 
 
 char pieceChars[] = ".PNBRQKpnbrqk";
 char sideChars[] = "wb-";
 char rankChars[] = "12345678";
 char fileChars[] = "abcdefgh";
+
+// bitwise AND with these values will update castling rights
+const int castleRightsUpdate[120] = {
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 
+    15, 13, 15, 15, 15, 12, 15, 15, 14, 15, 
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 
+    15,  7, 15, 15, 15,  3, 15, 15, 11, 15, 
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15
+};
+
+
+// hash piece(piece, sq):  pos->posKey ^= pieceKeys[piece][sq]
+// hash castle: pos->posKey ^= castleKeys[pos->castlePerm]
+// hash side: pos->posKey ^= sideKey
+// hash enPas: pos->posKey ^= pieceKeys[Empty][pos->enPas]
+
+
+bool makeMove(int move, Position *pos) {
+
+    //ASSERT(checkBoard(pos));
+
+    int originSQ = getOriginSQ(move);
+    int targetSQ = getTargetSQ(move);
+    int side = pos->side;
+
+    pos->history[pos->hisPly].posKey = pos->posKey;
+
+    if(move & moveFlagEP) {
+        if(side == WHITE) {
+            removePiece(targetSQ - 10, pos);
+        }
+        else {
+            removePiece(targetSQ + 10, pos);
+        }
+    }
+    if(move & moveFlagCastles) {
+        switch (targetSQ) {
+            case C1:
+                movePiece(A1, D1, pos);
+                break;
+            case G1:
+                movePiece(H1, F1, pos);
+                break;
+            case C8:
+                movePiece(A8, D8, pos);
+                break;
+            case G8:
+                movePiece(H8, F8, pos);
+                break;
+            default:
+                // something went wrong
+                ASSERT(false);
+                break;
+        }
+    }
+
+    if(pos->enPas != NO_SQ) {
+        pos->posKey ^= pieceKeys[EMPTY][pos->enPas];
+    }
+    pos->posKey ^= castleKeys[pos->castleRights];
+
+    pos->history[pos->hisPly].move = move;
+    pos->history[pos->hisPly].fiftyMove = pos->fiftyMove;
+    pos->history[pos->hisPly].enPas = pos->enPas;
+    pos->history[pos->hisPly].castleRights = pos->castleRights;
+
+    pos->castleRights &= castleRightsUpdate[originSQ];
+    pos->castleRights &= castleRightsUpdate[targetSQ];
+    pos->enPas = NO_SQ;
+
+    pos->posKey ^= castleKeys[pos->castleRights];
+
+    int captured = getCaptured(move);
+    pos->fiftyMove++;
+    if(captured != EMPTY) {
+        removePiece(targetSQ, pos);
+        pos->fiftyMove = 0;
+    }
+
+    pos->hisPly++;
+    pos->ply++;
+
+    if(!isPieceBig[pos->allPieces[originSQ]]) {
+        pos->fiftyMove = 0;
+        if(move & moveFlagPawnDouble) {
+            if(side == WHITE) {
+                pos->enPas = originSQ + 10;
+            }
+            else {
+                pos->enPas = originSQ - 10;
+            }
+            pos->posKey ^= pieceKeys[EMPTY][pos->enPas];
+        }
+    }
+
+    movePiece(originSQ, targetSQ, pos);
+    int promoted = getPromoted(move);
+    if(promoted != EMPTY) {
+        removePiece(targetSQ, pos);
+        addPiece(targetSQ, pos, promoted);
+    }
+
+    if(isPieceK[pos->allPieces[targetSQ]]) {
+        pos->kingSq[side] = targetSQ;
+    }
+    pos->side ^= 1;
+    pos->posKey ^= sideKey;
+
+    if(isSqAttacked(pos->kingSq[side], pos->side, pos)) {
+        undoMove(pos);
+        // update later - just dont generate illegal moves initially
+        return false;
+    }
+    //ASSERT(checkBoard(pos));
+
+    return true;
+}
+
+void undoMove(Position *pos) {
+    
+    //ASSERT(checkBoard(pos));
+
+    pos->hisPly--;
+    pos->ply--;
+
+    int move = pos->history[pos->hisPly].move;
+    int originSQ = getOriginSQ(move);
+    int targetSQ = getTargetSQ(move);
+
+    if(pos->enPas != NO_SQ) {
+        pos->posKey ^= pieceKeys[EMPTY][pos->enPas];
+    }
+    pos->posKey ^= castleKeys[pos->castleRights];
+
+    pos->castleRights = pos->history[pos->hisPly].castleRights;
+    pos->fiftyMove = pos->history[pos->hisPly].fiftyMove;
+    pos->enPas = pos->history[pos->hisPly].enPas;
+
+    if(pos->enPas != NO_SQ) {
+        pos->posKey ^= pieceKeys[EMPTY][pos->enPas];
+    }
+    pos->posKey ^= castleKeys[pos->castleRights];
+
+    pos->side ^= 1;
+    pos->posKey ^= sideKey;
+
+    if(move & moveFlagEP) {
+        if(pos->side == WHITE) {
+            addPiece(targetSQ - 10, pos, bP);
+        }
+        else {
+            addPiece(targetSQ + 10, pos, wP);
+        }
+    }
+    else if(move & moveFlagCastles) {
+        switch (targetSQ) {
+            case C1:
+                movePiece(D1, A1, pos);
+                break;
+            case G1:
+                movePiece(F1, H1, pos);
+                break;
+            case C8:
+                movePiece(D8, A8, pos);
+                break;
+            case G8:
+                movePiece(F8, H8, pos);
+                break;
+            default:
+                // something went wrong
+                ASSERT(false);
+                break;
+        }
+    }
+
+    movePiece(targetSQ, originSQ, pos);
+
+    if(isPieceK[pos->allPieces[originSQ]]) {
+        pos->kingSq[pos->side] = originSQ;
+    }
+
+    int captured = getCaptured(move);
+    if(captured != EMPTY) {
+        addPiece(targetSQ, pos, captured);
+    }
+
+    int promoted = getPromoted(move);
+    if(promoted != EMPTY) {
+        removePiece(originSQ, pos);
+        int pawn = (pieceColor[promoted] == WHITE ? wP : bP);
+        addPiece(originSQ, pos, pawn);
+    }
+
+    //ASSERT(checkBoard(pos));
+
+}
+
+static void movePiece(const int originSQ, const int targetSQ, Position *pos) {
+    
+    ASSERT(utils::sqOnBoard(originSQ));
+    ASSERT(utils::sqOnBoard(targetSQ));
+
+    int piece = pos->allPieces[originSQ];
+    int color = pieceColor[piece];
+
+    pos->posKey ^= pieceKeys[piece][originSQ];
+    pos->allPieces[originSQ] = EMPTY;
+    pos->posKey ^= pieceKeys[piece][targetSQ];
+    pos->allPieces[targetSQ] = piece;
+
+    // if it's a pawn update the bitboards
+    if((!isPieceBig[piece]) && (piece != EMPTY)) {
+        clearBit(pos->pawns[color], index120to64[originSQ]);
+        clearBit(pos->pawns[BOTH], index120to64[originSQ]);
+        setBit(pos->pawns[color], index120to64[targetSQ]);
+        setBit(pos->pawns[BOTH], index120to64[targetSQ]);
+    }
+
+    for(int i = 0; i < pos->numPieces[piece]; ++i) {
+        if(pos->pList[piece][i] == originSQ) {
+            pos->pList[piece][i] = targetSQ;
+            break;
+        }
+    }
+
+}
+
+static void addPiece(const int sq, Position *pos, const int piece) {
+
+    ASSERT(utils::sqOnBoard(sq));
+    ASSERT(utils::validatePiece(piece));
+
+    int color = pieceColor[piece];
+    pos->posKey ^= pieceKeys[piece][sq];
+    pos->allPieces[sq] = piece;
+    pos->material[color] += pieceValue[piece];
+
+    if(isPieceBig[piece]) {
+        pos->bigPieces[color]++;
+        if(isPieceMaj[piece]) {
+            pos->majPieces[color]++;
+        }
+        else {
+            pos->minPieces[color]++;
+        }
+    }
+    else {
+        setBit(pos->pawns[color], index120to64[sq]);
+        setBit(pos->pawns[BOTH], index120to64[sq]);
+    }
+
+    pos->pList[piece][pos->numPieces[piece]] = sq;
+    pos->numPieces[piece]++;
+
+}
+
+static void removePiece(const int sq, Position *pos) {
+
+    ASSERT(utils::sqOnBoard(sq));
+    int piece = pos->allPieces[sq];
+    ASSERT(utils::validatePiece(piece));
+
+    int color = pieceColor[piece];
+    pos->posKey ^= pieceKeys[piece][sq];
+
+    pos->allPieces[sq] = EMPTY;
+    pos->material[color] -= pieceValue[piece];
+
+    if(isPieceBig[piece]) {
+        pos->bigPieces[color]--;
+        if(isPieceMaj[piece]) {
+            pos->majPieces[color]--;
+        }
+        else {
+            pos->minPieces[color]--;
+        }
+    }
+    else {
+        clearBit(pos->pawns[color], index120to64[sq]);
+        clearBit(pos->pawns[BOTH], index120to64[sq]);
+    }
+
+    int pieceIndex = -1;
+    for(int i = 0; i < pos->numPieces[piece]; ++i) {
+        if(pos->pList[piece][i] == sq) {
+            pieceIndex = i;
+        }
+    }
+    ASSERT(pieceIndex != -1);
+
+    // update piece list by moving last piece in list to the removed piece index
+    pos->numPieces[piece]--;
+    pos->pList[piece][pieceIndex] = pos->pList[piece][pos->numPieces[piece]];
+
+}
 
 
 void updateMaterialLists(Position *pos) {
@@ -170,7 +474,7 @@ void initHashKeys() {
     }
     sideKey = RAND_64;
     for(int i = 0; i < 16; ++i) {
-        casteKeys[i] = RAND_64;
+        castleKeys[i] = RAND_64;
     }
 }
 
@@ -197,7 +501,7 @@ U64 generatePosKey(const Position *pos) {
     }
 
     ASSERT(pos->castleRights >= 0 && pos->castleRights <= 15);
-    finalKey ^= casteKeys[pos->castleRights];
+    finalKey ^= castleKeys[pos->castleRights];
 
     return finalKey;
 }
