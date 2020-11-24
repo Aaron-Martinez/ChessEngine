@@ -4,6 +4,7 @@
 #include "engine.hpp"
 #include "utils.hpp"
 #include "move_gen.hpp"
+#include "uci.hpp"
 
 
 // the following arrays are used to convert indices between 8x8 and 12x10 board
@@ -30,6 +31,7 @@ void initAll() {
     initBitMasks();
     initHashKeys();
     utils::initUtils();
+    initMvvLva();
     printf("finished initialization\n\n");
 }
 
@@ -62,17 +64,25 @@ void run() {
     //utils::readFenFromFile("perftsuite.epd");
 
     Position pos[1];
-    //std::string a = "k7/B7/1B6/1B6/8/8/8/K6b w - - 0 1"; // 21
-    std::string a = TRICKY_FEN;
+    initPVTable(pos->pvTable);
+
+    std::string a = WAC1;
+    //std::string a = TRICKY_FEN;
+    //std::string a = START_FEN;
+    //std::string a = MATE_IN_3;
+
     parseFEN(a.c_str(), pos);
-    printBoard(pos);
+    //printBoard(pos);
     
+    //utils::doMovesCmd(pos);
+
     //MoveList list[1];
     //generateAllMoves(pos, list);
     //utils::printMoveList(list);
 
-    utils::perftTest(6, pos);
-    
+    //utils::perftTest(5, pos);
+
+    UCI::loop();
 
 }
 

@@ -3,6 +3,8 @@
 
 #include "defs.h"
 #include "engine.hpp"
+#include "table.hpp"
+
 
 struct Position {
 
@@ -23,6 +25,10 @@ struct Position {
     int castleRights;
 
     MoveHistory history[MAXMOVES];
+    PVTable pvTable;
+    int pvArr[MAXDEPTH];
+    int searchHistory[13][BRD_NUM_SQ];
+    int searchKillers[2][MAXDEPTH];
 
     // piece list
     int pList[13][10];
@@ -34,6 +40,7 @@ static void addPiece(const int sq, Position *pos, const int piece);
 static void movePiece(const int originSQ, const int targetSQ, Position *pos);
 bool makeMove(int move, Position *pos);
 void undoMove(Position *pos);
+bool moveExists(Position *pos, const int move);
 
 void initHashKeys();
 void resetBoard(Position *pos);

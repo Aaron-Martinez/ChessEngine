@@ -42,7 +42,20 @@ const int moveFlagCastles = 0x3000000;
 const int moveFlagIsCapture = 0x7c000;
 const int moveFlagIsPromote = 0xf00000;
 
+// for move ordering using MVV-LVA to reduce alpha beta search space
+const int victimScores[13] = {0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600};
+static int mvvLvaScores[13][13];
 
+
+void initMvvLva() {
+    int attacker;
+    int victim;
+    for(attacker = wP; attacker <= bK; ++attacker) {
+        for(victim = wP; victim <= bK; ++victim) {
+            mvvLvaScores[victim][attacker] = victimScores[victim] + 6 - (victimScores[attacker] / 100);
+        }
+    }
+}
 
 int createMove(int originSQ, int targetSQ, int capturedPiece, int promotedPiece, int flags) {
     // flags include en passant, pawn 2sq push, and castles
@@ -50,23 +63,24 @@ int createMove(int originSQ, int targetSQ, int capturedPiece, int promotedPiece,
     return move;
 }
 
-static void addQuietMove(const Position *pos, int move, MoveList *list) {
-    list->moves[list->count].move = move;
-    list->moves[list->count].score = 0;
-    list->count++;
-}
-
-static void addCaptureMove(const Position *pos, int move, MoveList *list) {
-    list->moves[list->count].move = move;
-    list->moves[list->count].score = 0;
-    list->count++;
-}
-
-// dont need this method?
-static void addEnPasMove(const Position *pos, int move, MoveList *list) {
-    list->moves[list->count].move = move;
-    list->moves[list->count].score = 0;
-    list->count++;
+bool moveExists(Position *pos, const int move) {
+    
+    MoveList list[1];
+    generateAllMoves(pos, list);
+    int moveNum = 0;
+    int tempMove = 0;
+    
+    for(moveNum = 0; moveNum < list->count; ++moveNum) {
+        tempMove = list->moves[moveNum].move;
+        if(tempMove != move) {
+            continue;
+        }
+        if(makeMove(tempMove, pos)) {
+            undoMove(pos);
+            return true;
+        }
+    }
+    return false;
 }
 
 /// optimize later
@@ -237,6 +251,146 @@ void generateAllMoves(const Position *pos, MoveList *list) {
 
 }
 
+
+void generateCaptureMoves(const Position *pos, MoveList *list) {
+    
+    ASSERT(checkBoard(pos));
+    int side = pos->side;
+    list->count = 0;
+
+    // generate pawn moves
+    if(side == WHITE) {
+        for(int pieceIndex = 0; pieceIndex < pos->numPieces[wP]; ++pieceIndex) {
+            int sq = pos->pList[wP][pieceIndex];
+            ASSERT(utils::sqOnBoard(sq));
+
+            // white pawn capture moves
+            if(utils::sqOnBoard(sq + wpCapLeft) && pieceColor[pos->allPieces[sq + wpCapLeft]] == BLACK) {
+                addWhitePawnCapMove(pos, sq, sq + wpCapLeft, pos->allPieces[sq + wpCapLeft], list);
+            }
+            if(utils::sqOnBoard(sq + wpCapRight) && pieceColor[pos->allPieces[sq + wpCapRight]] == BLACK) {
+                addWhitePawnCapMove(pos, sq, sq + wpCapRight, pos->allPieces[sq + wpCapRight], list);
+            }
+            if(pos->enPas != NO_SQ && pos->enPas != OFFBOARD) {
+                if(sq + wpCapRight == pos->enPas) {
+                    addEnPasMove(pos, createMove(sq, sq + wpCapRight, EMPTY, EMPTY, moveFlagEP), list);
+                }
+                if(sq + wpCapLeft == pos->enPas) {
+                    addEnPasMove(pos, createMove(sq, sq + wpCapLeft, EMPTY, EMPTY, moveFlagEP), list);
+                }
+            }
+        }
+    }
+    else {
+        for(int pieceIndex = 0; pieceIndex < pos->numPieces[bP]; ++pieceIndex) {
+            int sq = pos->pList[bP][pieceIndex];
+            ASSERT(utils::sqOnBoard(sq));
+
+            // black pawn capture moves
+            if(utils::sqOnBoard(sq + bpCapLeft) && pieceColor[pos->allPieces[sq + bpCapLeft]] == WHITE) {
+                addBlackPawnCapMove(pos, sq, sq + bpCapLeft, pos->allPieces[sq + bpCapLeft], list);
+            }
+            if(utils::sqOnBoard(sq + bpCapRight) && pieceColor[pos->allPieces[sq + bpCapRight]] == WHITE) {
+                addBlackPawnCapMove(pos, sq, sq + bpCapRight, pos->allPieces[sq + bpCapRight], list);
+            }
+            if(pos->enPas != NO_SQ && pos->enPas != OFFBOARD) {
+                if(sq + bpCapRight == pos->enPas) {
+                    addEnPasMove(pos, createMove(sq, sq + bpCapRight, EMPTY, EMPTY, moveFlagEP), list);
+                }
+                if(sq + bpCapLeft == pos->enPas) {
+                    addEnPasMove(pos, createMove(sq, sq + bpCapLeft, EMPTY, EMPTY, moveFlagEP), list);
+                }
+            }
+        }
+    }
+
+    // generate non sliding big piece moves
+    for(int i = 0; i < 2; ++i) {
+        int piece = nonSlidingPiecesIndex[side][i];
+        for(int pieceNum = 0; pieceNum < pos->numPieces[piece]; ++pieceNum) {
+            int sq = pos->pList[piece][pieceNum];
+            ASSERT(utils::sqOnBoard(sq));
+            int numDirs = bigPieceNumDirs[piece];
+            for(int j = 0; j < numDirs; ++j) {
+                int dir = bigPieceDirs[piece][j];
+                int targetSQ = sq + dir;
+                if(utils::sqOnBoard(targetSQ)) {
+                    if(pos->allPieces[targetSQ] != EMPTY) {
+                        if(pieceColor[pos->allPieces[targetSQ]] == side ^ 1) {
+                            // opponents piece on this square
+                            addCaptureMove(pos, createMove(sq, targetSQ, pos->allPieces[targetSQ], EMPTY, 0), list);
+                        }
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+    // generate sliding big piece moves
+    for(int i = 0; i < 3; ++i) {
+        int piece = slidingPiecesIndex[side][i];
+
+        for(int pieceNum = 0; pieceNum < pos->numPieces[piece]; ++pieceNum) {
+            int sq = pos->pList[piece][pieceNum];
+            ASSERT(utils::sqOnBoard(sq));
+            int numDirs = bigPieceNumDirs[piece];
+
+            for(int j = 0; j < numDirs; ++j) {
+                int dir = bigPieceDirs[piece][j];
+                int targetSQ = sq + dir;
+
+                while(utils::sqOnBoard(targetSQ)) {
+                    if(pos->allPieces[targetSQ] != EMPTY) {
+                        if(pieceColor[pos->allPieces[targetSQ]] == side ^ 1) {
+                            // opponents piece on this square
+                            addCaptureMove(pos, createMove(sq, targetSQ, pos->allPieces[targetSQ], EMPTY, 0), list);
+                        }
+                        break;
+                    }
+                    targetSQ += dir;
+                }
+            }
+        }
+    }
+}
+
+static void addQuietMove(const Position *pos, int move, MoveList *list) {
+
+    ASSERT(utils::sqOnBoard(getOriginSQ(move)));
+    ASSERT(utils::sqOnBoard(getTargetSQ(move)));
+
+    list->moves[list->count].move = move;
+    if(pos->searchKillers[0][pos->ply] == move) {
+        list->moves[list->count].score = 900000;
+    }
+    else if(pos->searchKillers[1][pos->ply] == move) {
+        list->moves[list->count].score = 800000;
+    }
+    else {
+        list->moves[list->count].score = pos->searchHistory[pos->allPieces[getOriginSQ(move)]][getTargetSQ(move)];
+    }
+    list->count++;
+}
+
+static void addCaptureMove(const Position *pos, int move, MoveList *list) {
+
+    ASSERT(utils::sqOnBoard(getOriginSQ(move)));
+    ASSERT(utils::sqOnBoard(getTargetSQ(move)));
+    ASSERT(utils::validatePiece(getCaptured(move)));
+
+    list->moves[list->count].move = move;
+    list->moves[list->count].score = mvvLvaScores[getCaptured(move)][pos->allPieces[getOriginSQ(move)]] + 1000000;
+    list->count++;
+}
+
+// dont need this method?
+static void addEnPasMove(const Position *pos, int move, MoveList *list) {
+    list->moves[list->count].move = move;
+    list->moves[list->count].score = 105 + 1000000;
+    list->count++;
+}
+
 static void addWhitePawnCapMove(const Position *pos, const int originSQ, const int targetSQ, const int cap, MoveList *list) {
 
     if(ranksArr[originSQ] == RANK_7) {
@@ -333,7 +487,7 @@ bool isSqAttacked(const int sq, const int side, const Position *pos) {
     // knight attacks
     for(int i = 0; i < 8; ++i) {
         int piece = pos->allPieces[sq + knightDir[i]];
-        if(isPieceN[piece] && pieceColor[piece] == side) {
+        if(piece != OFFBOARD && isPieceN[piece] && pieceColor[piece] == side) {
             return true;
         }
     }
@@ -377,7 +531,7 @@ bool isSqAttacked(const int sq, const int side, const Position *pos) {
     // king attacks
     for(int i = 0; i < 8; ++i) {
         int piece = pos->allPieces[sq + kingDir[i]];
-        if(isPieceK[piece] && pieceColor[piece] == side) {
+        if(piece != OFFBOARD && isPieceK[piece] && pieceColor[piece] == side) {
             return true;
         }
     }

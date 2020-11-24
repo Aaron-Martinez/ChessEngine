@@ -1,7 +1,7 @@
 #ifndef DEFS_H
 #define DEFS_H
 
-#define DEBUG
+//#define DEBUG
 
 #ifndef DEBUG
 #define ASSERT(n)
@@ -17,16 +17,24 @@ exit(1);}
 
 #endif
 
+/// todo: come up with a better name later
+#define NAME "AARON_BOT"
 
 #define BRD_NUM_SQ 120
 #define MAXMOVES 2048
 #define MAXPOSITIONMOVES 256
+#define MAXDEPTH 64
+#define NOMOVE 0
+#define MATE 29000
+#define INFINITE 30000
 
 #define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define PAWN_MOVE_TEST_FEN_W "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P3P3/RNBQKBNR w KQkq e6 0 1"  // 43 legal moves
 #define PAWN_MOVE_TEST_FEN_B "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P3P3/RNBQKBNR b KQkq e3 0 1"
 #define D4_FEN "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"
 #define TRICKY_FEN "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
+#define MATE_IN_3 "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - -"
+#define WAC1 "r1b1k2r/ppppnppp/2n2q2/2b5/3NP3/2P1B3/PP3PPP/RN1QKB1R w KQkq - 0 1"
 
 
 #include <iostream>

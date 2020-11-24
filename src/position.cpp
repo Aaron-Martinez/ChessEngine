@@ -44,7 +44,7 @@ const int castleRightsUpdate[120] = {
 
 bool makeMove(int move, Position *pos) {
 
-    //ASSERT(checkBoard(pos));
+    ASSERT(checkBoard(pos));
 
     int originSQ = getOriginSQ(move);
     int targetSQ = getTargetSQ(move);
@@ -539,7 +539,6 @@ void resetBoard(Position *pos) {
     pos->hisPly = 0;
     pos->castleRights = 0;
     pos->posKey = 0ULL;
-
 }
 
 
