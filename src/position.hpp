@@ -40,6 +40,8 @@ static void addPiece(const int sq, Position *pos, const int piece);
 static void movePiece(const int originSQ, const int targetSQ, Position *pos);
 bool makeMove(int move, Position *pos);
 void undoMove(Position *pos);
+bool makeNullMove(Position *pos);
+bool undoNullMove(Position *pos);
 bool moveExists(Position *pos, const int move);
 
 void initHashKeys();
@@ -48,6 +50,7 @@ U64 generatePosKey(const Position *pos);
 int parseFEN(const char *fen, Position *pos);
 void printBoard(const Position *pos);
 void updateMaterialLists(Position *pos);
+void mirrorBoard(Position *pos);
 int checkBoard(const Position *pos);
 
 #endif

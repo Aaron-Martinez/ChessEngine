@@ -46,7 +46,7 @@ namespace utils {
     void perft(int depth, Position *pos);
     void perftTest(int depth, Position *pos);
     void multiplePerftTest(int depth, Position *pos, string fen, string fullLine);
-    void readFenFromFile(string fileName);
+    void readFenFromFile(string fileName, int depth);
 
     void printExTime(std::chrono::steady_clock::time_point startTime, std::chrono::steady_clock::time_point endTime, std::string desc);
     void printExTime(std::chrono::steady_clock::time_point startTime, std::chrono::steady_clock::time_point endTime);

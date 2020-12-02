@@ -156,7 +156,7 @@ namespace utils {
                 move = parseMove(input, pos);
                 if(move != 0) {
                     printf("Move is: %s\n", makeMoveStr(move).c_str());
-                    pos->pvTable.save(pos, move);
+                    // pos->pvTable.save(pos, move);
                     bool legal = makeMove(move, pos);
                     if(!legal) {
                         printf("illegal move made\n");
@@ -353,8 +353,8 @@ namespace utils {
         printf("%s\nNODES:  %ld\n\n", fullLine.c_str(), leafNodes);
     }
 
-    void readFenFromFile(string fileName) {
-        int depth = 5;
+    void readFenFromFile(string fileName, int depth) {
+        //int depth = 5;
         string fen = "";
         std::fstream file;
         file.open(fileName);

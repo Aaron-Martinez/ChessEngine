@@ -81,6 +81,20 @@ void UCI::go(Position *pos, SearchInfo &info, std::istringstream &iss) {
     info.startTime = utils::currentTimeMillis();
     info.depth = depth;
 
+    if(pos->hisPly < 18) {
+        movestogo = 30;
+    } else if(pos->hisPly < 28) {
+        movestogo = 18;
+    } else if(pos->hisPly < 48) {
+        movestogo = 8;
+    } else if(pos->hisPly < 60) { 
+        movestogo = 13;
+    } else if(pos->hisPly < 80) {
+        movestogo = 22;
+    } else {
+        movestogo = 30;
+    }
+
     if(time != -1) {
         info.timeSet = true;
         time = (time / movestogo) - 50;

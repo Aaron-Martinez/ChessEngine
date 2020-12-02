@@ -13,6 +13,11 @@ const int BitTable[64] = {
 U64 setMask[64];
 U64 clearMask[64];
 
+U64 fileBBMasks[8];
+U64 rankBBMasks[8];
+U64 passedPawnMasks[2][64];
+U64 isoPawnMasks[64];
+
 
 void initBitMasks() {
     for(int i = 0; i < 64; ++i) {
@@ -24,6 +29,84 @@ void initBitMasks() {
         setMask[i] |= (1ULL << i);
         clearMask[i] = ~setMask[i];
     }
+}
+
+void initBitboards() {
+    
+    for(int i = 0; i < 8; ++i) {
+        fileBBMasks[i] = 0ULL;
+        rankBBMasks[i] = 0ULL;
+    }
+
+    for(int r = RANK_1; r <= RANK_8; ++r) {
+        for(int f = FILE_A; f <= FILE_H; ++f) {
+            int sq = r * 8 + f;
+            fileBBMasks[f] |= (1ULL << sq);
+            rankBBMasks[r] |= (1ULL << sq);
+
+            passedPawnMasks[WHITE][sq] = 0ULL;
+            passedPawnMasks[BLACK][sq] = 0ULL;
+            isoPawnMasks[sq] = 0ULL;
+        }
+    }
+
+    for(int sq = 0; sq < 64; ++sq) {
+        passedPawnMasks[WHITE][sq] = forwardRanksBB(WHITE, sq) & (adjacentFilesBB(sq) | fileBBMasks[sq % 8]);
+        passedPawnMasks[BLACK][sq] = forwardRanksBB(BLACK, sq) & (adjacentFilesBB(sq) | fileBBMasks[sq % 8]);
+        isoPawnMasks[sq] = adjacentFilesBB(sq);
+    }
+
+    // printf("White pawn d5 passed pawn mask\n");
+    // printBitboard(passedPawnMasks[WHITE][index120to64[D5]]);
+    // printf("Black pawn h4 passed pawn mask\n");
+    // printBitboard(passedPawnMasks[BLACK][index120to64[H4]]);
+    // printf("Isolated pawn b3 mask\n");
+    // printBitboard(isoPawnMasks[index120to64[B3]]);
+
+}
+
+U64 forwardRanksBB(int color, int sq) {
+    if(color == WHITE) {
+        return ( ~rankBBMasks[0] << (8 * (sq / 8)) );
+    }
+    else {
+        return ( ~rankBBMasks[7] >> (8 * (7 - (sq / 8))) );
+    }
+}
+
+U64 adjacentFilesBB(int sq) {
+    U64 thisFileBB = fileBBMasks[sq % 8];
+    U64 westFileBB = (thisFileBB & ~fileBBMasks[0]) >> 1;
+    U64 eastFileBB = (thisFileBB & ~fileBBMasks[7]) << 1;
+    return westFileBB | eastFileBB;
+}
+
+bool isPawnIsolated(const U64 pawns[3], int sq, int color) {
+    if( (isoPawnMasks[index120to64[sq]] & pawns[color]) == 0 ) {
+        return true;
+    }
+    return false;
+}
+
+bool isPawnPassed(const U64 pawns[3], int sq, int color) {
+    if( (passedPawnMasks[color][index120to64[sq]] & pawns[color]) == 0 ) {
+        return true;
+    }
+    return false;
+}
+
+bool isOpenFile(const U64 pawns[3], int sq) {
+    if( (pawns[BOTH] & fileBBMasks[filesArr[sq]]) == 0 ) {
+        return true;
+    }
+    return false;
+}
+
+bool isSemiOpenFile(const U64 pawns[3], int sq, int color) {
+    if( (pawns[color] & fileBBMasks[filesArr[sq]]) == 0 ) {
+        return true;
+    }
+    return false;
 }
 
 void clearBit(U64& bboard, int index) {

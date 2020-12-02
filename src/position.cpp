@@ -222,6 +222,58 @@ void undoMove(Position *pos) {
 
 }
 
+bool makeNullMove(Position *pos) {
+
+    ASSERT(checkBoard(pos));
+
+    pos->ply++;
+    pos->history[pos->hisPly].posKey = pos->posKey;
+
+    if(pos->enPas != NO_SQ) {
+        pos->posKey ^= pieceKeys[EMPTY][pos->enPas];
+    }
+
+    pos->history[pos->hisPly].move = NOMOVE;
+    pos->history[pos->hisPly].fiftyMove = pos->fiftyMove;
+    pos->history[pos->hisPly].enPas = pos->enPas;
+    pos->history[pos->hisPly].castleRights = pos->castleRights;
+    pos->enPas = NO_SQ;
+
+    pos->side ^= 1;
+    pos->hisPly++;
+    pos->fiftyMove++;
+    pos->posKey ^= sideKey;
+
+    ASSERT(checkBoard(pos));
+
+}
+
+bool undoNullMove(Position *pos) {
+
+    ASSERT(checkBoard(pos));
+
+    pos->ply--;
+    pos->hisPly--;
+
+    if(pos->enPas != NO_SQ) {
+        pos->posKey ^= pieceKeys[EMPTY][pos->enPas];
+    }
+
+    pos->fiftyMove = pos->history[pos->hisPly].fiftyMove;
+    pos->enPas = pos->history[pos->hisPly].enPas;
+    pos->castleRights = pos->history[pos->hisPly].castleRights;
+
+    if(pos->enPas != NO_SQ) {
+        pos->posKey ^= pieceKeys[EMPTY][pos->enPas];
+    }
+
+    pos->side ^= 1;
+    pos->posKey ^= sideKey;
+
+    ASSERT(checkBoard(pos));
+
+}
+
 static void movePiece(const int originSQ, const int targetSQ, Position *pos) {
     
     ASSERT(utils::sqOnBoard(originSQ));
@@ -539,6 +591,14 @@ void resetBoard(Position *pos) {
     pos->hisPly = 0;
     pos->castleRights = 0;
     pos->posKey = 0ULL;
+}
+
+
+void mirrorBoard(Position *pos) {
+    
+    int tempPieces[64];
+    int tempSide = pos->side^1;
+    int swapPiece[13] = {EMPTY, bP, bN, bB, bR, bQ, bK, wP, wN, wB, wR, wQ, wK};
 }
 
 

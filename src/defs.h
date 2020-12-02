@@ -67,6 +67,7 @@ enum {
 
 extern int index120to64[BRD_NUM_SQ];
 extern int index64to120[64];
+extern const int mirror64[64];
 
 extern int isPieceN[13];
 extern int isPieceK[13];

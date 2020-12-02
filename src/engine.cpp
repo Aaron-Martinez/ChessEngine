@@ -29,6 +29,7 @@ int pieceColor[13] = {BOTH, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLA
 void initAll() {
     initBoardIndexConversions();
     initBitMasks();
+    initBitboards();
     initHashKeys();
     utils::initUtils();
     initMvvLva();
@@ -61,17 +62,17 @@ void initBoardIndexConversions() {
 
 void run() {
     
-    //utils::readFenFromFile("perftsuite.epd");
+    //utils::readFenFromFile("perftsuite.epd", 4);
 
-    Position pos[1];
-    initPVTable(pos->pvTable);
+    //Position pos[1];
+    //initPVTable(pos->pvTable);
 
-    std::string a = WAC1;
+    //std::string a = WAC1;
     //std::string a = TRICKY_FEN;
     //std::string a = START_FEN;
     //std::string a = MATE_IN_3;
 
-    parseFEN(a.c_str(), pos);
+    //parseFEN(a.c_str(), pos);
     //printBoard(pos);
     
     //utils::doMovesCmd(pos);

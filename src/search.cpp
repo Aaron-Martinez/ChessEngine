@@ -67,7 +67,7 @@ void search(Position *pos, SearchInfo &info) {
 static int alphaBeta(int alpha, int beta, int depth, Position *pos, SearchInfo &info, bool doNull) {
     
     ASSERT(checkBoard(pos));
-    if(depth == 0) {
+    if(depth <= 0) {
         //info.nodes++;
         return quiescence(alpha, beta, pos, info);
         //return evaluate(pos);
@@ -85,6 +85,31 @@ static int alphaBeta(int alpha, int beta, int depth, Position *pos, SearchInfo &
         return evaluate(pos);
     }
 
+    bool inCheck = isSqAttacked(pos->kingSq[pos->side], pos->side^1, pos);
+    if(inCheck) {
+        depth++;
+    }
+
+    int score = -INFINITE;
+    int pvMove = NOMOVE;
+
+    if(pos->pvTable.probe(pos, pvMove, score, alpha, beta, depth)) {
+        pos->pvTable.cut++;
+        return score;
+    }
+    // null move pruning
+    if(doNull && !inCheck && pos->ply && (pos->bigPieces[pos->side] > 2) && depth >= 4) {
+        makeNullMove(pos);
+        score = -alphaBeta(-beta, -beta + 1, depth - 4, pos, info, false);
+        undoNullMove(pos);
+        if(info.stopped) {
+            return 0;
+        }
+        if(score >= beta && abs(score) < MATE) {
+            return beta;
+        }
+    }
+
     MoveList list[1];
     generateAllMoves(pos, list);
 
@@ -92,9 +117,10 @@ static int alphaBeta(int alpha, int beta, int depth, Position *pos, SearchInfo &
     int legalMoves = 0;
     int prevAlpha = alpha;
     int bestMove = NOMOVE;
-    int score = -INFINITE;
+    int bestScore = -INFINITE;
+    score = -INFINITE;
     
-    int pvMove = pos->pvTable.probe(pos);
+    //int pvMove = pos->pvTable.probe(pos);
     if(pvMove != NOMOVE) {
         for(moveNum = 0; moveNum < list->count; ++moveNum) {
             if(list->moves[moveNum].move == pvMove) {
@@ -115,31 +141,38 @@ static int alphaBeta(int alpha, int beta, int depth, Position *pos, SearchInfo &
                 return 0;
             }
 
-            if(score >= beta) {
-                if(legalMoves == 1) {
-                    info.fhf++;
-                }
-                info.fh++;                
-                if(!(list->moves[moveNum].move & moveFlagIsCapture)) {
-                    pos->searchKillers[1][pos->ply] = pos->searchKillers[0][pos->ply];
-                    pos->searchKillers[0][pos->ply] = list->moves[moveNum].move;
-                }
-
-                return beta;
-            }
-            if(score > alpha) {
-                alpha = score;
+            if(score > bestScore) {
+                bestScore = score;
                 bestMove = list->moves[moveNum].move;
-                if(!(list->moves[moveNum].move & moveFlagIsCapture)) {
-                    pos->searchHistory[pos->allPieces[getOriginSQ(bestMove)]][getTargetSQ(bestMove)] += depth;
+
+                if(score >= beta) {
+                    if(legalMoves == 1) {
+                        info.fhf++;
+                    }
+                    info.fh++;                
+                    if(!(list->moves[moveNum].move & moveFlagIsCapture)) {
+                        pos->searchKillers[1][pos->ply] = pos->searchKillers[0][pos->ply];
+                        pos->searchKillers[0][pos->ply] = list->moves[moveNum].move;
+                    }
+                    // store hash entry
+                    pos->pvTable.save(pos, bestMove, beta, depth, HFBETA);
+
+                    return beta;
                 }
-            }
+                if(score > alpha) {
+                    alpha = score;
+                    //bestMove = list->moves[moveNum].move;
+                    if(!(list->moves[moveNum].move & moveFlagIsCapture)) {
+                        pos->searchHistory[pos->allPieces[getOriginSQ(bestMove)]][getTargetSQ(bestMove)] += depth;
+                    }
+                }
+            } // end score > bestScore
         }
     }
 
     // check for stalemate/checkmate
     if(legalMoves == 0) {
-        if(isSqAttacked(pos->kingSq[pos->side], pos->side^1, pos)) {
+        if(inCheck) {
             return -MATE + pos->ply;
         }
         else {
@@ -148,8 +181,15 @@ static int alphaBeta(int alpha, int beta, int depth, Position *pos, SearchInfo &
     }
 
     if(alpha != prevAlpha) {
-        pos->pvTable.save(pos, bestMove);
+        // store hash entry
+        pos->pvTable.save(pos, bestMove, bestScore, depth, HFEXACT);
+        //pos->pvTable.save(pos, bestMove);
+    } 
+    else {
+        // store hash entry
+        pos->pvTable.save(pos, bestMove, alpha, depth, HFALPHA);
     }
+
     return alpha;
 }
 
@@ -211,9 +251,11 @@ static int quiescence(int alpha, int beta, Position *pos, SearchInfo &info) {
         }
     }
 
+/*
     if(alpha != prevAlpha) {
         pos->pvTable.save(pos, bestMove);
     }
+*/
 
     return alpha;
 }
@@ -236,7 +278,9 @@ void clearSearch(Position *pos, SearchInfo &info) {
         }
     }
 
-    clearPVTable(pos->pvTable);
+    // dont clear now that this is transposition table
+    //clearPVTable(pos->pvTable);
+
     pos->ply = 0;
 
     //info.startTime = std::chrono::steady_clock::now();
