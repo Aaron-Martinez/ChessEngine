@@ -1,9 +1,12 @@
-#include "stdio.h"
-#include "bitboard.hpp"
-// #include "position.hpp"
 #include "engine.hpp"
+
+#include "bitboard.hpp"
 #include "move_gen.hpp"
+#include "position.hpp"
 #include "uci.hpp"
+#include "utils.hpp"
+
+#include "stdio.h"
 
 
 // the following arrays are used to convert indices between 8x8 and 12x10 board

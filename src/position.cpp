@@ -1,7 +1,10 @@
 #include "position.hpp"
+
 #include "bitboard.hpp"
-#include "utils.hpp"
+#include "engine.hpp"
 #include "move_gen.hpp"
+#include "utils.hpp"
+
 
 #define RAND_64 (   (U64)rand() | \
                     (U64)rand() << 15 | \

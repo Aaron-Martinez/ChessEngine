@@ -2,8 +2,7 @@
 #define MOVE_GEN_HPP
 
 #include "defs.h"
-#include "engine.hpp"
-// #include "position.hpp"
+
 
 struct Position;
 

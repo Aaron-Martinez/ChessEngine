@@ -2,9 +2,7 @@
 #define POSITION_HPP
 
 #include "defs.h"
-#include "engine.hpp"
 #include "table.hpp"
-#include "utils.hpp"
 
 
 struct PVTable;

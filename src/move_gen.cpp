@@ -1,4 +1,6 @@
 #include "move_gen.hpp"
+
+#include "position.hpp"
 #include "utils.hpp"
 
 

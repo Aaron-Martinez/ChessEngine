@@ -1,8 +1,8 @@
 #include "uci.hpp"
+
 #include "position.hpp"
 #include "search.hpp"
 #include "utils.hpp"
-
 
 
 void UCI::loop() {

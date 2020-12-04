@@ -14,8 +14,8 @@ using std::cin;
 using std::getline;
 using std::istringstream;
 
-class Position;
-class SearchInfo;
+struct Position;
+struct SearchInfo;
 
 namespace UCI {
 

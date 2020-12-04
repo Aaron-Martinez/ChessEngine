@@ -1,4 +1,5 @@
 #include "bitboard.hpp"
+
 #include <iostream>
 #include <cstdlib>
 

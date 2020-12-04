@@ -1,5 +1,11 @@
 #include "utils.hpp"
 
+#include "engine.hpp"
+#include "move_gen.hpp"
+#include "position.hpp"
+#include "search.hpp"
+#include "table.hpp"
+
 #include <cstdlib>
 #include <iostream>
 #include "sys/time.h"

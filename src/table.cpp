@@ -1,5 +1,7 @@
 #include "table.hpp"
+
 #include "position.hpp"
+#include "utils.hpp"
 
 
 const int pvSizeTemp = 0x100000 * 16;

@@ -2,13 +2,9 @@
 #define SEARCH_HPP
 
 #include "defs.h"
-#include "engine.hpp"
-#include "position.hpp"
-#include "table.hpp"
-#include "evaluate.hpp"
-// #include "move_gen.hpp"
 
 
+struct Position;
 struct MoveList;
 
 

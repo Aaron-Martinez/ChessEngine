@@ -1,4 +1,7 @@
 #include "evaluate.hpp"
+
+#include "bitboard.hpp"
+#include "position.hpp"
 #include "utils.hpp"
 
 

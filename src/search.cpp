@@ -1,4 +1,8 @@
 #include "search.hpp"
+
+#include "evaluate.hpp"
+#include "move_gen.hpp"
+#include "position.hpp"
 #include "utils.hpp"
 
 

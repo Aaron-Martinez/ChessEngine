@@ -2,11 +2,6 @@
 #define UTILS_HPP
 
 #include "defs.h"
-#include "position.hpp"
-#include "move_gen.hpp"
-#include "bitboard.hpp"
-// #include "table.hpp"
-#include "search.hpp"
 
 #include <string>
 #include <iostream>
