@@ -3,8 +3,9 @@
 
 #include "defs.h"
 #include "engine.hpp"
-#include "position.hpp"
+// #include "position.hpp"
 
+struct Position;
 
 /*
     The move struct will contain an int encoding for the chess move, and a score given by evaluation function.

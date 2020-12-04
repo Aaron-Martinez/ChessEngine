@@ -1,5 +1,5 @@
 #include "defs.h"
-#include "bitboard.hpp"
+// #include "bitboard.hpp"
 #include "engine.hpp"
 #include "utils.hpp"
 
@@ -13,12 +13,12 @@ using std::endl;
 
 int main() {
 
-    exTime_t startTime = std::chrono::steady_clock::now();
+    long startTime = utils::currentTimeMillis();
     printf("start\n");
     initAll();
     run();
     
-    exTime_t endTime = std::chrono::steady_clock::now();
+    long endTime = utils::currentTimeMillis();
     utils::printExTime(startTime, endTime, "Total execution time:");
 
     printf("\ndone\n");

@@ -1,8 +1,7 @@
 #include "stdio.h"
 #include "bitboard.hpp"
-#include "position.hpp"
+// #include "position.hpp"
 #include "engine.hpp"
-#include "utils.hpp"
 #include "move_gen.hpp"
 #include "uci.hpp"
 

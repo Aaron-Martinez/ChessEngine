@@ -1,24 +1,9 @@
 #ifndef DEFS_H
 #define DEFS_H
 
-//#define DEBUG
-
-#ifndef DEBUG
-#define ASSERT(n)
-#else
-#define ASSERT(n) \
-if(!(n)) { \
-printf("%s - Failed ", #n); \
-printf("On %s ", __DATE__); \
-printf("At %s ", __TIME__); \
-printf("In File %s ", __FILE__); \
-printf("At Line %d\n", __LINE__); \
-exit(1);}
-
-#endif
 
 /// todo: come up with a better name later
-#define NAME "AARON_BOT"
+#define NAME "Hoodwink"
 
 #define BRD_NUM_SQ 120
 #define MAXMOVES 2048
@@ -47,8 +32,6 @@ enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE
 enum { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
 enum { WHITE, BLACK, BOTH };
 
-// may use this depending on move representation details
-//enum { PROMOTED_KNIGHT = 1, PROMOTED_BISHOP = 2, PROMOTED_ROOK = 4, PROMOTED_QUEEN = 8};
 
 // castling rights
 enum { W_OO = 1, W_OOO = 2, B_OO = 4, B_OOO = 8 };
@@ -73,7 +56,6 @@ extern int isPieceN[13];
 extern int isPieceK[13];
 extern int isPieceRQ[13];
 extern int isPieceBQ[13];
-
 extern int isPieceBig[13];
 extern int isPieceMaj[13];
 extern int isPieceMin[13];
@@ -90,14 +72,6 @@ extern const int moveFlagPawnDouble;
 extern const int moveFlagCastles;
 extern const int moveFlagIsCapture;
 extern const int moveFlagIsPromote;
-
-struct MoveHistory {
-    int move;
-    int castleRights;
-    int enPas;
-    int fiftyMove;
-    U64 posKey;
-};
 
 
 #endif

@@ -2,8 +2,6 @@
 #define TABLE_HPP
 
 #include "defs.h"
-#include "engine.hpp"
-//#include "position.hpp"
 
 #include <vector>
 

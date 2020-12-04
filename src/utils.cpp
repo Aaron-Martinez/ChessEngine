@@ -391,6 +391,27 @@ namespace utils {
         printExTime(startTime, endTime, "Execution time:");
     }
 
+    void printExTime(long startTime, long endTime) {
+        printExTime(startTime, endTime, "Execution time:");
+    }
+
+    void printExTime(long startTime, long endTime, std::string desc) {
+        long millis = endTime - startTime;
+        int minutes = millis / 60000;
+        millis -= minutes * 60000;
+        int seconds = millis / 1000;
+        millis -= seconds * 1000;
+        if(minutes > 0) {
+            printf("%s %d minutes, %d seconds, and %ld milliseconds\n", desc.c_str(), minutes, seconds, millis);
+        }
+        else if(seconds > 0) {
+            printf("%s %d seconds, and %ld milliseconds\n", desc.c_str(), seconds, millis);
+        }
+        else {
+            printf("%s %ld milliseconds\n", desc.c_str(), millis);
+        }
+    }
+
     long exTimeMillis(std::chrono::steady_clock::time_point startTime, std::chrono::steady_clock::time_point endTime) {
         return (std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count()); 
     }

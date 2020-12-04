@@ -5,7 +5,7 @@
 #include "position.hpp"
 #include "move_gen.hpp"
 #include "bitboard.hpp"
-#include "table.hpp"
+// #include "table.hpp"
 #include "search.hpp"
 
 #include <string>
@@ -13,8 +13,29 @@
 #include <fstream>
 #include <chrono>
 
+
+//#define DEBUG
+
+#ifndef DEBUG
+#define ASSERT(n)
+#else
+#define ASSERT(n) \
+if(!(n)) { \
+printf("%s - Failed ", #n); \
+printf("On %s ", __DATE__); \
+printf("At %s ", __TIME__); \
+printf("In File %s ", __FILE__); \
+printf("At Line %d\n", __LINE__); \
+exit(1);}
+
+#endif
+
 using std::string;
 typedef std::chrono::steady_clock::time_point exTime_t;
+
+struct Position;
+struct SearchInfo;
+struct MoveList;
 
 namespace utils {
     
@@ -50,6 +71,8 @@ namespace utils {
 
     void printExTime(std::chrono::steady_clock::time_point startTime, std::chrono::steady_clock::time_point endTime, std::string desc);
     void printExTime(std::chrono::steady_clock::time_point startTime, std::chrono::steady_clock::time_point endTime);
+    void printExTime(long startTime, long endTime, std::string desc);
+    void printExTime(long startTime, long endTime);
     long exTimeMillis(std::chrono::steady_clock::time_point startTime, std::chrono::steady_clock::time_point endTime);
     long currentTimeMillis();
 };

@@ -6,7 +6,10 @@
 #include "position.hpp"
 #include "table.hpp"
 #include "evaluate.hpp"
-#include "move_gen.hpp"
+// #include "move_gen.hpp"
+
+
+struct MoveList;
 
 
 struct SearchInfo {

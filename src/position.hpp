@@ -4,7 +4,18 @@
 #include "defs.h"
 #include "engine.hpp"
 #include "table.hpp"
+#include "utils.hpp"
 
+
+struct PVTable;
+
+struct MoveHistory {
+    int move;
+    int castleRights;
+    int enPas;
+    int fiftyMove;
+    U64 posKey;
+};
 
 struct Position {
 
