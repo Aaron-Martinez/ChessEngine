@@ -1,10 +1,32 @@
 #include "table.hpp"
 
+#include "move_gen.hpp"
 #include "position.hpp"
 #include "utils.hpp"
 
 
 const int pvSizeTemp = 0x100000 * 16;
+
+
+
+void initPVTable(PVTable &table) {
+
+    table.numEntries = pvSizeTemp / sizeof(PVEntry) - 2;
+    printf("Table initialized with numEntries = %d\n", table.numEntries);
+    table.pvTable = std::vector<PVEntry>(table.numEntries);
+    clearPVTable(table);
+    
+}
+
+void clearPVTable(PVTable &table) {
+    for(PVEntry entry : table.pvTable) {
+        entry.posKey = 0ULL;
+        entry.move = NOMOVE;
+        entry.depth = 0;
+        entry.score = 0;
+        entry.flags = 0;
+    }
+}
 
 
 int PVTable::probe(Position *pos) {
@@ -83,9 +105,9 @@ void PVTable::save(Position *pos, const int move, int score, const int depth, co
     ASSERT(index >= 0 && index <= pos->pvTable.numEntries - 1);
 
     if(pos->pvTable.pvTable[index].posKey == 0) {
-        // new write++
+        pos->pvTable.newWrite++;
     } else {
-        // overwrite++
+        pos->pvTable.overWrite++;
     }
 
     if(score > MATE) {
@@ -123,23 +145,4 @@ int PVTable::getPV(const int depth, Position *pos) {
     }
 
     return count;
-}
-
-void initPVTable(PVTable &table) {
-
-    table.numEntries = pvSizeTemp / sizeof(PVEntry) - 2;
-    printf("Table initialized with numEntries = %d\n", table.numEntries);
-    table.pvTable = std::vector<PVEntry>(table.numEntries);
-    clearPVTable(table);
-    
-}
-
-void clearPVTable(PVTable &table) {
-    for(PVEntry entry : table.pvTable) {
-        entry.posKey = 0ULL;
-        entry.move = NOMOVE;
-        entry.depth = 0;
-        entry.score = 0;
-        entry.flags = 0;
-    }
 }

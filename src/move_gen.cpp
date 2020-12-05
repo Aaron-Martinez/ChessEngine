@@ -44,9 +44,13 @@ const int moveFlagCastles = 0x3000000;
 const int moveFlagIsCapture = 0x7c000;
 const int moveFlagIsPromote = 0xf00000;
 
-// for move ordering using MVV-LVA to reduce alpha beta search space
+// MVV-LVA = Most valuable victim, least valuable attacker.
+// This is used for move ordering to reduce alpha beta search space.
+// Candidate capture moves are ordered by most valuable piece captured, then by least valuable 
+// attacking piece (i.e. pawn takes queen, knight takes queen, ..., rook takes pawn, queen takes pawn)
 const int victimScores[13] = {0, 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600};
 static int mvvLvaScores[13][13];
+
 
 
 void initMvvLva() {
@@ -59,31 +63,6 @@ void initMvvLva() {
     }
 }
 
-int createMove(int originSQ, int targetSQ, int capturedPiece, int promotedPiece, int flags) {
-    // flags include en passant, pawn 2sq push, and castles
-    int move = originSQ | (targetSQ << 7) | (capturedPiece << 14) | (promotedPiece << 20) | flags;
-    return move;
-}
-
-bool moveExists(Position *pos, const int move) {
-    
-    MoveList list[1];
-    generateAllMoves(pos, list);
-    int moveNum = 0;
-    int tempMove = 0;
-    
-    for(moveNum = 0; moveNum < list->count; ++moveNum) {
-        tempMove = list->moves[moveNum].move;
-        if(tempMove != move) {
-            continue;
-        }
-        if(makeMove(tempMove, pos)) {
-            undoMove(pos);
-            return true;
-        }
-    }
-    return false;
-}
 
 /// optimize later
 void generateAllMoves(const Position *pos, MoveList *list) {
@@ -357,112 +336,32 @@ void generateCaptureMoves(const Position *pos, MoveList *list) {
     }
 }
 
-static void addQuietMove(const Position *pos, int move, MoveList *list) {
 
-    ASSERT(utils::sqOnBoard(getOriginSQ(move)));
-    ASSERT(utils::sqOnBoard(getTargetSQ(move)));
-
-    list->moves[list->count].move = move;
-    if(pos->searchKillers[0][pos->ply] == move) {
-        list->moves[list->count].score = 900000;
-    }
-    else if(pos->searchKillers[1][pos->ply] == move) {
-        list->moves[list->count].score = 800000;
-    }
-    else {
-        list->moves[list->count].score = pos->searchHistory[pos->allPieces[getOriginSQ(move)]][getTargetSQ(move)];
-    }
-    list->count++;
+int createMove(int originSQ, int targetSQ, int capturedPiece, int promotedPiece, int flags) {
+    // flags include en passant, pawn 2sq push, and castles
+    int move = originSQ | (targetSQ << 7) | (capturedPiece << 14) | (promotedPiece << 20) | flags;
+    return move;
 }
 
-static void addCaptureMove(const Position *pos, int move, MoveList *list) {
 
-    ASSERT(utils::sqOnBoard(getOriginSQ(move)));
-    ASSERT(utils::sqOnBoard(getTargetSQ(move)));
-    ASSERT(utils::validatePiece(getCaptured(move)));
-
-    list->moves[list->count].move = move;
-    list->moves[list->count].score = mvvLvaScores[getCaptured(move)][pos->allPieces[getOriginSQ(move)]] + 1000000;
-    list->count++;
-}
-
-// dont need this method?
-static void addEnPasMove(const Position *pos, int move, MoveList *list) {
-    list->moves[list->count].move = move;
-    list->moves[list->count].score = 105 + 1000000;
-    list->count++;
-}
-
-static void addWhitePawnCapMove(const Position *pos, const int originSQ, const int targetSQ, const int cap, MoveList *list) {
-
-    if(ranksArr[originSQ] == RANK_7) {
-        // this pawn is promoting, add move for each promotion piece choice
-        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, wQ, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, wR, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, wB, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, wN, 0), list);
+bool moveExists(Position *pos, const int move) {
+    
+    MoveList list[1];
+    generateAllMoves(pos, list);
+    int moveNum = 0;
+    int tempMove = 0;
+    
+    for(moveNum = 0; moveNum < list->count; ++moveNum) {
+        tempMove = list->moves[moveNum].move;
+        if(tempMove != move) {
+            continue;
+        }
+        if(makeMove(tempMove, pos)) {
+            undoMove(pos);
+            return true;
+        }
     }
-    else {
-        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, EMPTY, 0), list);
-    }
-
-}
-
-static void addWhitePawnMove(const Position *pos, const int originSQ, const int targetSQ, MoveList *list) {
-    if(ranksArr[originSQ] == RANK_7) {
-        // this pawn is promoting, add move for each promotion piece choice
-        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wQ, 0), list);
-        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wR, 0), list);
-        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wB, 0), list);
-        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wN, 0), list);
-    }
-    else {
-        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, EMPTY, 0), list);
-    }
-}
-
-static void addBlackPawnCapMove(const Position *pos, const int originSQ, const int targetSQ, const int cap, MoveList *list) {
-
-    if(ranksArr[originSQ] == RANK_2) {
-        // this pawn is promoting, add move for each promotion piece choice
-        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, bQ, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, bR, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, bB, 0), list);
-        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, bN, 0), list);
-    }
-    else {
-        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, EMPTY, 0), list);
-    }
-
-}
-
-static void addBlackPawnMove(const Position *pos, const int originSQ, const int targetSQ, MoveList *list) {
-    if(ranksArr[originSQ] == RANK_2) {
-        // this pawn is promoting, add move for each promotion piece choice
-        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bQ, 0), list);
-        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bR, 0), list);
-        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bB, 0), list);
-        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bN, 0), list);
-    }
-    else {
-        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, EMPTY, 0), list);
-    }
-}
-
-int getOriginSQ(int move) {
-    return (move & 0x7f);
-}
-
-int getTargetSQ(int move) {
-    return ((move >> 7) & 0x7f);
-}
-
-int getCaptured(int move) {
-    return ((move >> 14) & 0xf);
-}
-
-int getPromoted(int move) {
-    return ((move >> 20) & 0xf);
+    return false;
 }
 
 
@@ -539,4 +438,123 @@ bool isSqAttacked(const int sq, const int side, const Position *pos) {
     }
 
     return false;
+}
+
+
+static void addQuietMove(const Position *pos, int move, MoveList *list) {
+
+    ASSERT(utils::sqOnBoard(getOriginSQ(move)));
+    ASSERT(utils::sqOnBoard(getTargetSQ(move)));
+
+    list->moves[list->count].move = move;
+    if(pos->searchKillers[0][pos->ply] == move) {
+        list->moves[list->count].score = 900000;
+    }
+    else if(pos->searchKillers[1][pos->ply] == move) {
+        list->moves[list->count].score = 800000;
+    }
+    else {
+        list->moves[list->count].score = pos->searchHistory[pos->allPieces[getOriginSQ(move)]][getTargetSQ(move)];
+    }
+    list->count++;
+}
+
+
+static void addCaptureMove(const Position *pos, int move, MoveList *list) {
+
+    ASSERT(utils::sqOnBoard(getOriginSQ(move)));
+    ASSERT(utils::sqOnBoard(getTargetSQ(move)));
+    ASSERT(utils::validatePiece(getCaptured(move)));
+
+    list->moves[list->count].move = move;
+    list->moves[list->count].score = mvvLvaScores[getCaptured(move)][pos->allPieces[getOriginSQ(move)]] + 1000000;
+    list->count++;
+}
+
+
+// dont need this method?
+static void addEnPasMove(const Position *pos, int move, MoveList *list) {
+    list->moves[list->count].move = move;
+    list->moves[list->count].score = 105 + 1000000;
+    list->count++;
+}
+
+
+static void addWhitePawnCapMove(const Position *pos, const int originSQ, const int targetSQ, const int cap, MoveList *list) {
+
+    if(ranksArr[originSQ] == RANK_7) {
+        // this pawn is promoting, add move for each promotion piece choice
+        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, wQ, 0), list);
+        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, wR, 0), list);
+        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, wB, 0), list);
+        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, wN, 0), list);
+    }
+    else {
+        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, EMPTY, 0), list);
+    }
+
+}
+
+
+static void addWhitePawnMove(const Position *pos, const int originSQ, const int targetSQ, MoveList *list) {
+    if(ranksArr[originSQ] == RANK_7) {
+        // this pawn is promoting, add move for each promotion piece choice
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wQ, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wR, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wB, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, wN, 0), list);
+    }
+    else {
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, EMPTY, 0), list);
+    }
+}
+
+
+static void addBlackPawnCapMove(const Position *pos, const int originSQ, const int targetSQ, const int cap, MoveList *list) {
+
+    if(ranksArr[originSQ] == RANK_2) {
+        // this pawn is promoting, add move for each promotion piece choice
+        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, bQ, 0), list);
+        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, bR, 0), list);
+        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, bB, 0), list);
+        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, bN, 0), list);
+    }
+    else {
+        addCaptureMove(pos, createMove(originSQ, targetSQ, cap, EMPTY, 0), list);
+    }
+
+}
+
+
+static void addBlackPawnMove(const Position *pos, const int originSQ, const int targetSQ, MoveList *list) {
+    if(ranksArr[originSQ] == RANK_2) {
+        // this pawn is promoting, add move for each promotion piece choice
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bQ, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bR, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bB, 0), list);
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, bN, 0), list);
+    }
+    else {
+        addQuietMove(pos, createMove(originSQ, targetSQ, EMPTY, EMPTY, 0), list);
+    }
+}
+
+
+int getOriginSQ(int move) {
+    return (move & 0x7f);
+}
+
+
+int getTargetSQ(int move) {
+    return ((move >> 7) & 0x7f);
+}
+
+
+int getCaptured(int move) {
+    return ((move >> 14) & 0xf);
+}
+
+
+int getPromoted(int move) {
+    return ((move >> 20) & 0xf);
 }

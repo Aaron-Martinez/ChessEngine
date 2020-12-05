@@ -93,10 +93,21 @@ int rookOpenFile = 15;
 int rookSemiOpenFile = 10;
 int queenOpenFile = 8;
 int queenSemiOpenFile = 5;
-int bishopPair;
+int bishopPair = 35;
 int endgameMaterialLimit = 1460;
 
 
+
+// This is the main evaluation function. Currently the evaluation function considers the following:
+//  1) Static material values
+//  2) Passed pawns
+//  3) Isolated pawns
+//  4) Open and semi-open files
+//  5) King position in opening vs endgame
+//  6) Position of all other pieces using static tables
+//
+// A higher positive score indicates better position for white, and a more negative score indicates a
+// better position for black, with a 0 score meaning equal or drawn
 int evaluate(const Position *pos) {
     if(isMaterialDraw(pos)) {
         return 0;
@@ -109,6 +120,7 @@ int evaluate(const Position *pos) {
         return -score;
     }
 }
+
 
 int evalPieces(const Position *pos) {
     int piece;
@@ -158,10 +170,10 @@ int evalPieces(const Position *pos) {
 		score -= bishopTable[mirror64[index120to64[sq]]];
 	}
 
-    if(pos->numPieces[wB] >= 2) {
+    if(pos->numPieces[wB] >= 2 && pos->numPieces[bB] < 2) {
         score += bishopPair;
     }
-    if(pos->numPieces[bB] >= 2) {
+    if(pos->numPieces[bB] >= 2 && pos->numPieces[wB] < 2) {
         score -= bishopPair;
     }
 
@@ -215,13 +227,7 @@ int evalPieces(const Position *pos) {
         }
 	}
 
-    //printf("returning score of %d for side %d\n", score, pos->side);
-    // if(pos->side == WHITE) {
-        return score;
-    // }
-    // else {
-    //     return -score;
-    // }
+    return score;
 }
 
 
@@ -257,14 +263,9 @@ int evalPawnStructure(const Position *pos) {
         }
     }
 
-
-    // if(pos->side == WHITE) {
-        return score;
-    // }
-    // else {
-    //     return -score;
-    // }
+    return score;
 }
+
 
 int evalKings(const Position *pos) {
     

@@ -6,6 +6,7 @@
 #include "utils.hpp"
 
 
+
 // find best scoring move and swap it to the front of the list
 static void pickNextMove(int moveNum, MoveList *list) {
     Move tempMove;
@@ -25,6 +26,7 @@ static void pickNextMove(int moveNum, MoveList *list) {
     list->moves[bestIndex] = tempMove;
 }
 
+
 void search(Position *pos, SearchInfo &info) {
     
     int bestMove = NOMOVE;
@@ -32,9 +34,6 @@ void search(Position *pos, SearchInfo &info) {
     int currentDepth = 0;
     int pvMoves = 0;
     int pvIndex = 0;
-    
-    //int alpha = -INFINITE;
-    //int beta = INFINITE;
 
     clearSearch(pos, info);
 
@@ -67,6 +66,7 @@ void search(Position *pos, SearchInfo &info) {
     }
     printf("bestmove %s\n", utils::makeMoveStr(bestMove).c_str());
 }
+
 
 static int alphaBeta(int alpha, int beta, int depth, Position *pos, SearchInfo &info, bool doNull) {
     
@@ -197,6 +197,7 @@ static int alphaBeta(int alpha, int beta, int depth, Position *pos, SearchInfo &
     return alpha;
 }
 
+
 static int quiescence(int alpha, int beta, Position *pos, SearchInfo &info) {
     
     ASSERT(checkBoard(pos));
@@ -255,14 +256,9 @@ static int quiescence(int alpha, int beta, Position *pos, SearchInfo &info) {
         }
     }
 
-/*
-    if(alpha != prevAlpha) {
-        pos->pvTable.save(pos, bestMove);
-    }
-*/
-
     return alpha;
 }
+
 
 // get ready for fresh new search
 void clearSearch(Position *pos, SearchInfo &info) {
@@ -294,6 +290,7 @@ void clearSearch(Position *pos, SearchInfo &info) {
     info.fhf = 0;
 }
 
+
 static bool isRepitition(const Position *pos) {
 
     for(int i = pos->hisPly - pos->fiftyMove; i < pos->hisPly - 1; ++i) {
@@ -305,6 +302,7 @@ static bool isRepitition(const Position *pos) {
 
 }
 
+
 // check for time up or interrupt from GUI
 static void checkStatus(SearchInfo &info) {
     if((info.timeSet) && (utils::currentTimeMillis() > info.stopTime)) {
@@ -312,4 +310,3 @@ static void checkStatus(SearchInfo &info) {
     }
     utils::readInput(info);
 }
-

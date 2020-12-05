@@ -27,11 +27,11 @@
 
 typedef unsigned long long U64;
 
+
 enum { EMPTY, wP, wN, wB, wR, wQ, wK, bP, bN, bB, bR, bQ, bK };
 enum { FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NONE };
 enum { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE };
 enum { WHITE, BLACK, BOTH };
-
 
 // castling rights
 enum { W_OO = 1, W_OOO = 2, B_OO = 4, B_OOO = 8 };
@@ -48,10 +48,15 @@ enum {
     A8 = 91, B8, C8, D8, E8, F8, G8, H8, NO_SQ, OFFBOARD
 };
 
+
+// ***** GLOBAL VARIABLES ***** ///
+
+// convert between 120 and 64 index boards
 extern int index120to64[BRD_NUM_SQ];
 extern int index64to120[64];
 extern const int mirror64[64];
 
+// piece information
 extern int isPieceN[13];
 extern int isPieceK[13];
 extern int isPieceRQ[13];

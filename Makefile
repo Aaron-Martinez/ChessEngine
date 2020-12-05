@@ -1,2 +1,6 @@
 all:
-	g++ src/*.cpp -o AARON_BOT
+	g++ src/*.cpp -o Hoodwink
+
+
+clean:
+	rm ./Hoodwink

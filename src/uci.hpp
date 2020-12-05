@@ -17,6 +17,7 @@ using std::istringstream;
 struct Position;
 struct SearchInfo;
 
+
 namespace UCI {
 
     void loop();

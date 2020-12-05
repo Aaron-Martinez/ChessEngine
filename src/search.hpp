@@ -12,19 +12,19 @@ struct SearchInfo {
     long startTime;
     long stopTime;
     bool timeSet;
+    int movesToGo;
 
     int depth;
     int depthSet;
+    long nodes;
+
+    // fail-high count to test effectiveness of our move ordering
+    float fh;
+    float fhf;
     
-    int movesToGo;
     bool infinite;
     bool quit;
     bool stopped;
-
-    long nodes;
-
-    float fh;
-    float fhf;
 };
 
 

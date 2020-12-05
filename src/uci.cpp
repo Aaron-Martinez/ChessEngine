@@ -5,6 +5,8 @@
 #include "utils.hpp"
 
 
+
+// The UCI loop waits for commands from stdin, parses them and calls the appropriate functions
 void UCI::loop() {
     
     setbuf(stdin, NULL);
@@ -45,6 +47,11 @@ void UCI::loop() {
     } while(!info.quit);
 }
 
+
+// When the engine recieves the "go" UCI command this function is called. It starts
+// calculating the current position. Additional commands can follow this one to do 
+// things like report the time left on the clock for the engine or specify a search
+// depth to stop at
 void UCI::go(Position *pos, SearchInfo &info, std::istringstream &iss) {
     string token;
     info.timeSet = false;
@@ -109,6 +116,11 @@ void UCI::go(Position *pos, SearchInfo &info, std::istringstream &iss) {
     search(pos, info);
 }
 
+
+// Called when the engine recieves the UCI command "position [fen | startpos] moves ..."
+// Sets up the position in the FEN string fen or the starting position, then makes the moves 
+// given in the move list which follows. Moves from UCI are given in long algebraic notation
+// Examples: e2e4, e1g1 (white kingside castle), e7e8q (promoting to queen)
 void UCI::position(Position *pos, std::istringstream &iss) {
     // check for ucinewgame
     string token, fen;

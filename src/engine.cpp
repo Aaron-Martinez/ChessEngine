@@ -64,6 +64,7 @@ void initBoardIndexConversions() {
 
 void run() {
     
+    initAll();
     //utils::readFenFromFile("perftsuite.epd", 4);
 
     //Position pos[1];

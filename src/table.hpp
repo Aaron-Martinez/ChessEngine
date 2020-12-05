@@ -10,6 +10,7 @@ struct Position;
 
 enum { HFNONE, HFALPHA, HFBETA, HFEXACT };
 
+
 struct PVEntry {
     U64 posKey;
     int move;
