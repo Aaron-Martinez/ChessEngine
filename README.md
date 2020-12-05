@@ -4,6 +4,7 @@ A UCI-compatible chess engine written in C++
 This chess engine was created by Aaron Martinez. The initial structure of this project was based largely off of the open source chess engine Vice, with some other ideas taken from the chess programming wiki, and some individual components added on top. I haven't yet done any in-depth measure of its playing strength. For a vague idea of strength - I am rated ~1600 blitz on chess.com and have played many blitz games vs Hoodwink. I get completely destroyed every time and I haven't managed to secure a single win or draw. I will soon post some example games of the engine playing itself and playing against me. 
 
 https://www.chessprogramming.org/Main_Page
+
 https://www.chessprogramming.org/Vice
 
 The current code makes use of the following techniques:
