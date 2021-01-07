@@ -1,0 +1,18 @@
+[Event "Computer chess game"]
+[Site "aaron-desktop"]
+[Date "2021.01.05"]
+[Round "?"]
+[White "Hoodwink"]
+[Black "Hoodwink"]
+[Result "0-1"]
+1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O b5 6. Bb3 Be7 7. d4 d6 8.
+dxe5 dxe5 9. Qxd8+ Bxd8 10. Ng5 O-O 11. f4 exf4 12. Bxf4 Nd4 13. Nc3 b4 14.
+Bxf7+ Rxf7 15. Nxf7 Kxf7 16. Nd5 Nxc2 17. Rac1 Nd4 18. Kh1 Bb7 19. Bxc7
+Bxd5 20. exd5 Nb5 21. Be5 Ra7 22. Rc4 Rd7 23. Rxb4 Rxd5 24. Re4 Kg6 25.
+Ree1 Ng4 26. Bg3 Bf6 27. Re4 h5 28. a4 Nd4 29. h3 Nf5 30. Bf4 Nge3 31. Rxe3
+Nxe3 32. Bxe3 Bxb2 33. Rb1 Bf6 34. Rb6 Rd1+ 35. Kh2 Kf5 36. Rb4 Be5+ 37. g3
+a5 38. Rh4 g6 39. Rc4 Rd3 40. Bf4 Rc3 41. Rxc3 Bxc3 42. Kg2 g5 43. Bd6 g4
+44. hxg4+ hxg4 45. Kf2 Ke4 46. Ke2 Kd4 47. Kd1 Kc4 48. Kc2 Bh8 49. Bf4 Kb4
+50. Kd3 Kxa4 51. Kc4 Ka3 52. Bd6+ Kb2 53. Kb5 Bc3 54. Bc7 Kb3 55. Bxa5 Bxa5
+56. Kxa5 Kc2 57. Ka4 Kd2 58. Kb3 Ke3 59. Kc2 Kf2 60. Kd3 Kxg3 61. Ke3
+{White resigns} 0-1

@@ -1,7 +1,9 @@
 # Hoodwink
 A UCI-compatible chess engine written in C++
 
-This chess engine was created by Aaron Martinez. The initial structure of this project was based largely off of the open source chess engine Vice, with some other ideas taken from the chess programming wiki, and some individual components added on top. I haven't yet done any in-depth measure of its playing strength. For a vague idea of strength - I am rated ~1600 blitz on chess.com and have played many blitz games vs Hoodwink. I get completely destroyed every time and I haven't managed to secure a single win or draw. I will soon post some example games of the engine playing itself and playing against me. 
+This chess engine was created by Aaron Martinez. The initial structure of this project was based largely off of the open source chess engine Vice, with some other ideas taken from the chess programming wiki, and some individual components added on top. I haven't yet done any in-depth measure of its playing strength. For a vague idea of strength - I am rated ~1600 blitz on chess.com and have played many blitz games vs Hoodwink, and I get completely destroyed almost every time. 
+
+I have some pgn files in example_games where I have many games of Hoodwink playing against itself. Two big things I have noticed by analyzing these games after is that the search depth is not high enough yet to catch long sequences, or tactics which are a few moves down the road. The other is king safety - many times one side or both will not castle and often get punished later. See my first personal win against Hoodwink in example_games/rapid/myFirstWin.pgn for a good example of both of these flaws in action. Fixing these are the next two immediate objectives for me.
 
 https://www.chessprogramming.org/Main_Page
 
