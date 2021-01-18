@@ -67,16 +67,18 @@ void run() {
     initAll();
     //utils::readFenFromFile("perftsuite.epd", 4);
 
-    //Position pos[1];
-    //initPVTable(pos->pvTable);
+    Position pos[1];
+    initPVTable(pos->pvTable);
 
     //std::string a = WAC1;
     //std::string a = TRICKY_FEN;
     //std::string a = START_FEN;
-    //std::string a = MATE_IN_3;
 
-    //parseFEN(a.c_str(), pos);
-    //printBoard(pos);
+    std::string a = PINS_FEN1;
+
+
+    parseFEN(a.c_str(), pos);
+    printBoard(pos);
     
     //utils::doMovesCmd(pos);
 
@@ -86,7 +88,7 @@ void run() {
 
     //utils::perftTest(5, pos);
 
-    UCI::loop();
+    //UCI::loop();
 
 }
 
