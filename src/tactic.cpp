@@ -164,7 +164,7 @@ vector<Pin> getAllPins(Position *pos) {
                                             pins.push_back(pin);
                                             printPin(pin, pos);
                                             pinFound = true;
-                                            break;
+                                            // break;
                                         }
 
                                         else if(isPieceBig[pos->allPieces[targetSQ]]) {
@@ -178,12 +178,13 @@ vector<Pin> getAllPins(Position *pos) {
                                                 pins.push_back(pin);
                                                 printPin(pin, pos);
                                                 pinFound = true;
-                                                break;
+                                                // break;
                                             }
                                         }
                                         
                                     }
-                                    
+                                    noPins = true;
+                                    break;
                                 }
                                 targetSQ += dir;
                             }
@@ -206,6 +207,12 @@ vector<Pin> getAllPins(Position *pos) {
 
 
 bool isPin(Position *pos, int move) {
+    vector<Pin> allPins = getAllPins(pos);
+    vector<Pin> allPins2;
+    if(makeMove(move, pos)) {
+        allPins2 = getAllPins(pos);
+    }
+    // look for the new pins
     return false;
 }
 

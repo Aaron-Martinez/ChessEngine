@@ -77,7 +77,7 @@ void run() {
     //std::string a = START_FEN;
 
     std::string a = PINS_FEN1;
-
+    std::string b = PINS_FEN2;
 
     parseFEN(a.c_str(), pos);
     std::cout << "\n\nFEN used: " << a << "\n\n";
@@ -95,6 +95,12 @@ void run() {
 
     std::vector<Pin> pins = getAllPins(pos);
 
+    parseFEN(b.c_str(), pos);
+    std::cout << "\n\nFEN used: " << b << "\n\n";
+    printBoard(pos);
+
+    std::vector<Pin> pins2 = getAllPins(pos);
+    
 }
 
 int getIndex(int file, int rank) {
