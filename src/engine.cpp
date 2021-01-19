@@ -5,8 +5,10 @@
 #include "position.hpp"
 #include "uci.hpp"
 #include "utils.hpp"
+#include "tactic.hpp"
 
 #include "stdio.h"
+#include <vector>
 
 
 // the following arrays are used to convert indices between 8x8 and 12x10 board
@@ -78,6 +80,7 @@ void run() {
 
 
     parseFEN(a.c_str(), pos);
+    std::cout << "\n\nFEN used: " << a << "\n\n";
     printBoard(pos);
     
     //utils::doMovesCmd(pos);
@@ -89,6 +92,8 @@ void run() {
     //utils::perftTest(5, pos);
 
     //UCI::loop();
+
+    std::vector<Pin> pins = getAllPins(pos);
 
 }
 

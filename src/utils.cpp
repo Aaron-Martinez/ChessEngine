@@ -22,6 +22,8 @@ namespace utils {
     // for move algebraic notation
     string pieceAlgNot[13] = {"", "", "N", "B", "R", "Q", "K", "", "N", "B", "R", "Q", "K"};
     char pieceAlgNotChar[13] = {' ', ' ', 'N', 'B', 'R', 'Q', 'K', ' ', 'N', 'B', 'R', 'Q', 'K'};
+    string pieceNames[13] = {"Empty square", "pawn", "knight", "bishop", "rook", "queen", "king", 
+                                             "pawn", "knight", "bishop", "rook", "queen", "king"};
     
     long leafNodes = 0;  // for perft testing
 

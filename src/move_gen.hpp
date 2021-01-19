@@ -72,6 +72,7 @@ void generateCaptureMoves(const Position *pos, MoveList *list);
 int createMove(int originSQ, int targetSQ, int capturedPiece, int promotedPiece, int flags);
 bool moveExists(Position *pos, const int move);
 bool isSqAttacked(const int sq, const int side, const Position *pos);
+bool isCheckmate(Position *pos);
 
 // Add moves to move list
 static void addQuietMove(const Position *pos, int move, MoveList *list);

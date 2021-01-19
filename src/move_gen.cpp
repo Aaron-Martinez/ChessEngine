@@ -441,6 +441,36 @@ bool isSqAttacked(const int sq, const int side, const Position *pos) {
 }
 
 
+bool isCheckmate(Position *pos) {
+    //std::cout << "checking checkmate" << std::endl;
+    MoveList list[1];
+    generateAllMoves(pos, list);
+    //std::string s = "test1 and numMoves = " + std::to_string(list->count) + "\n";
+    //std::cout << s;
+    // std::cout << "test1 and numMoves = " << std::to_string(list->count) << std::endl;
+    int legalMoves = 0;
+    for(int moveNum = 0; moveNum < list->count; ++moveNum) {
+        int move = list->moves[moveNum].move;
+        // std::cout << "making move " << std::to_string(move) << ": " << utils::makeMoveStr(move) << std::endl;
+        if(!makeMove(move, pos)) {
+            // std::cout << "illegal move" << std::endl;
+        }
+        else {
+            undoMove(pos);
+            legalMoves++;
+            break;
+        }
+    }
+    bool inCheck = isSqAttacked(pos->kingSq[pos->side], pos->side^1, pos);
+    if(inCheck && legalMoves == 0) {
+        // std::cout << "yes checkmate" << std::endl;
+        return true;
+    }
+    // std::cout << "not checkmate" << std::endl;
+    return false;
+}
+
+
 static void addQuietMove(const Position *pos, int move, MoveList *list) {
 
     ASSERT(utils::sqOnBoard(getOriginSQ(move)));

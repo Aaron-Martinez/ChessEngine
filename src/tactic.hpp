@@ -27,7 +27,8 @@ struct Pin {
 
 vector<Pin> getAllPins(Position *pos);
 bool isPin(Position *pos, int move);
-
+void printPin(Pin pin, Position *pos);
+void printCheckMatePin(Pin pin, Position *pos, int preventedMove, int move);
 
 
 #endif
